@@ -6,7 +6,7 @@ def test_get_all_books_with_no_records(client):
 
     # Assert
     assert response.status_code == 200
-    assert response_body == []
+    assert response_body == [""]
     
 def test_get_one_book(client, two_saved_books):
     # Act

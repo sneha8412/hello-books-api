@@ -1,5 +1,5 @@
 from app import db
-from flask import Blueprint
+from flask import Blueprint, Response
 from flask import request
 from flask import jsonify
 from .models.book import Book
@@ -25,6 +25,9 @@ def get_single_book(book_id):
         
     book = Book.query.get(book_id)
     
+    if book == None:
+        return Response("",404)
+    
     if book:
         return  book.to_json(), 200
     
@@ -33,13 +36,22 @@ def get_single_book(book_id):
         "success": False
     }, 404
     
+    
+    
 @books_bp.route("", methods=["GET"], strict_slashes=False)
 def books_index():
-    books = Book.query.all()
+    
+    title_query = request.args.get("title")
+    
+    if title_query:
+        books = Book.query.filter_by(title=title_query)
+    else:
+        books = Book.query.all()
+        
     books_response = [] 
     for book in books:
         books_response.append(book.to_json())
-    return jsonify(books_response), 200
+        return jsonify(books_response), 200
 
 
 @books_bp.route("", methods=["POST"], strict_slashes=False)
@@ -51,11 +63,34 @@ def books():
     db.session.add(new_book)
     db.session.commit()
     
-    #return (f"book #{new_book.title} has been created", 201)
     return {
         "success": True,
         "message": f"Book {new_book.title} has been created"
     }, 201
+    
+@books_bp.route("/<book_id>", methods=["PUT"], strict_slashes=False)
+def update_book(book_id):
+    book = Book.query.get(book_id)
+    if book: 
+        form_data = request.get_json()
+
+        book.title = form_data["title"]
+        book.description = form_data["description"]
+
+        db.session.commit()
+
+        return Response(f"Book #{book.id} successfully updated", status=200)
+    
+@books_bp.route("/<book_id>", methods=["DELETE"], strict_slashes=False)    
+def delete_single_book(book_id):
+    book = Book.query.get(book_id)
+    if book:
+        db.session.delete(book)
+        db.session.commit()
+        return Response(f"Book #{book.id} successfully deleted", status=200)
+
+    #return (f"book #{new_book.title} has been created", 201)
+    
     
     
     

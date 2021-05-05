@@ -1,6 +1,7 @@
 import pytest
 from app import create_app
 from app import db
+from app.models.books import Books
 
 
 @pytest.fixture
@@ -24,6 +25,7 @@ def two_saved_books(app):
     # Arrange
     ocean_book = Book(title="Ocean Book",
                       description="watr 4evr")
+    
     mountain_book = Book(title="Mountain Book",
                          description="i luv 2 climb rocks")
 

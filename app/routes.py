@@ -26,7 +26,7 @@ def get_single_book(book_id):
     book = Book.query.get(book_id)
     
     if book == None:
-        return Response("",404)
+        return Response("",status=404)
     
     if book:
         return  book.to_json(), 200
@@ -41,10 +41,12 @@ def get_single_book(book_id):
 @books_bp.route("", methods=["GET"], strict_slashes=False)
 def books_index():
     
+    books = []
     title_query = request.args.get("title")
     
-    if title_query:
-        books = Book.query.filter_by(title=title_query)
+    if title_query is not None:
+        book_title = title_query
+        books = Book.query.filter_by(title=title_query) # we can put multiple query parameters, books is an instance of class Book
     else:
         books = Book.query.all()
         
@@ -71,6 +73,10 @@ def books():
 @books_bp.route("/<book_id>", methods=["PUT"], strict_slashes=False)
 def update_book(book_id):
     book = Book.query.get(book_id)
+    
+    if book == None:
+        return Response("", status=404)
+    
     if book: 
         form_data = request.get_json()
 
@@ -84,6 +90,10 @@ def update_book(book_id):
 @books_bp.route("/<book_id>", methods=["DELETE"], strict_slashes=False)    
 def delete_single_book(book_id):
     book = Book.query.get(book_id)
+    
+    if book == None:
+        return Response("", status=404)
+    
     if book:
         db.session.delete(book)
         db.session.commit()
